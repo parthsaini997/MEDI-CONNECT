@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MEDI-CONNECT</title>
+<style>
+body { font-family: Georgia, serif; background: #f0f4f8; color: #222; margin: 0; padding: 0; }
+.nav { background: #1a5276; padding: 10px 20px; }
+.nav a { color: white; text-decoration: none; font-size: 15px; margin-right: 18px; font-weight: bold; }
+.nav a:hover { color: #aed6f1; }
+.hdr { background: #2980b9; color: white; text-align: center; padding: 25px; }
+.hdr h1 { font-size: 32px; margin: 0 0 5px; }
+.hdr p { font-size: 13px; margin: 0; }
+.main { max-width: 880px; margin: 20px auto; padding: 0 15px; width: 100%; box-sizing: border-box; }
+.page-body { flex: 1; }
+.box { background: white; border: 1px solid #ccc; padding: 20px; margin-bottom: 18px; }
+.box h2 { color: #1a5276; font-size: 19px; border-bottom: 2px solid #2980b9; padding-bottom: 7px; margin-top: 0; }
+table { border-collapse: collapse; width: 100%; }
+th { background: #1a5276; color: white; padding: 8px 11px; text-align: left; font-size: 13px; }
+td { padding: 7px 11px; font-size: 14px; border-bottom: 1px solid #ddd; }
+tr:hover td { background: #eaf4fb; }
+.sym td { border: 1px solid #ccc; background: #f9f9f9; width: 33%; }
+.sym td:hover { background: #d6eaf8; }
+input[type=submit], input[type=button] { background: #2980b9; color: white; border: none; padding: 9px 20px; font-size: 14px; cursor: pointer; }
+input[type=submit]:hover, input[type=button]:hover { background: #1a5276; }
+input[type=reset] { background: #ddd; color: #333; border: 1px solid #aaa; padding: 9px 18px; font-size: 14px; cursor: pointer; }
+input[type=text], input[type=number], select { padding: 6px 9px; border: 1px solid #aaa; font-size: 14px; width: 190px; }
+input:focus, select:focus { border-color: #2980b9; outline: none; }
+.red { color: red; font-size: 13px; }
+.warn { color: darkorange; font-size: 12px; font-style: italic; }
+.blue { color: #1a5276; font-weight: bold; }
+.green { color: green; font-weight: bold; }
+footer { background: #1a5276; color: white; text-align: center; padding: 12px; font-size: 13px; margin-top: auto; }
+footer a { color: #aed6f1; text-decoration: none; }
+hr { border: none; border-top: 1px solid #ccc; margin: 15px 0; }
+.section { display: none; flex-direction: column; min-height: 100vh; }
+.section:target { display: flex; }
+html:not(:has(:target)) #home { display: flex; }
+#home:target { display: flex; }
+
+/* Toast notification */
+#toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1a5276; color: white; padding: 13px 28px; border-radius: 4px; font-size: 14px; opacity: 0; transition: all 0.4s ease; z-index: 9999; pointer-events: none; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Live clock in nav */
+#liveclock { color: #aed6f1; font-size: 13px; float: right; padding-top: 2px; font-family: monospace; }
+
+/* Symptom match highlight */
+.match-highlight { background: #d5f5e3 !important; font-weight: bold; }
+
+/* Diagnosis result dynamic box */
+#dynamic-result { display: none; margin-bottom: 18px; }
+#dynamic-result.show { display: block; }
+/* Hide all static result boxes — JS shows only the matching one */
+.static-result-box { display: none; }
+.static-result-box.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="#home">Home</a>
+  <a href="#diagnosis">Diagnosis</a>
+  <a href="#about">About Us</a>
+  <a href="#contact">Contact</a>
+  <a href="#result">Result</a>
+</div>
+
+<!-- ==================== PART 1 - PARTH SAINI (Home + Navbar + Footer) ==================== -->
+
+<div id="home" class="section">
+  <div class="page-body">
+  <div class="hdr">
+    <h1>MEDI-CONNECT</h1>
+    <p>Your Online Health Assistant | Front End Engineering Project</p>
+  </div>
+  <div class="main">
+
+    <div class="box">
+      <h2>Welcome to MEDI-CONNECT</h2>
+      <p>
+        <b>MEDI-CONNECT</b> is a simple online health assistant made by Group 7, First Year B.Tech CSE as a Web Technology mini project.
+        Select your symptoms, enter your basic details, and the site will show you the most likely disease along with commonly prescribed medicines and dosage.
+        It covers 6 illnesses including Viral Fever, Common Cold, Food Poisoning, Migraine, Skin Allergy, and Flu, built using only HTML and CSS.
+      </p>
+      <p class="red">** IMPORTANT: This is NOT real medical advice. It is only for learning purposes. Always consult a qualified doctor for any health problem. **</p>
+      <br>
+      <a href="#diagnosis"><input type="button" value="Start Diagnosis Now"></a>
+    </div>
+
+  </div>
+  </div><!-- end page-body -->
+  <footer><p>MEDI-CONNECT &copy; 2025 | <a href="#contact">Contact Us</a></p></footer>
+</div> - SAKSHAM SHARMA (Diagnosis Page + Form + Result) ==================== -->
+
+<div id="diagnosis" class="section">
+  <div class="page-body">
+  <div class="hdr">
+    <h1>MEDI-CONNECT</h1>
+    <p>Your Online Health Assistant | B.Tech CSE First Year Project</p>
+  </div>
+  <div class="main">
+    <div class="box">
+      <h2>Enter Patient Details</h2>
+      <p class="red">** Please fill all details carefully. **</p>
+      <form action="#result" method="get">
+        <table>
+          <tr>
+            <td><label>Patient Name:</label><br><input type="text" name="name" placeholder="Your name" required></td>
+            <td><label>Age:</label><br><input type="number" name="age" placeholder="e.g. 20" min="1" max="120" required></td>
+          </tr>
+          <tr>
+            <td><label>Gender:</label><br>
+              <select name="gender" required>
+                <option value="">-- Select --</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </td>
+            <td><label>Days Sick:</label><br><input type="number" name="days" placeholder="e.g. 3" min="1" required></td>
+          </tr>
+        </table>
+        <hr>
+        <h3 style="color:#1a5276">Select Your Symptoms:</h3>
+        <table class="sym">
+          <tr>
+            <td><input type="checkbox" name="fever"> Fever</td>
+            <td><input type="checkbox" name="headache"> Headache</td>
+            <td><input type="checkbox" name="cough"> Cough</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="cold"> Cold / Runny Nose</td>
+            <td><input type="checkbox" name="throat"> Sore Throat</td>
+            <td><input type="checkbox" name="bodyache"> Body Ache</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="stomach"> Stomach Pain</td>
+            <td><input type="checkbox" name="vomiting"> Vomiting</td>
+            <td><input type="checkbox" name="fatigue"> Fatigue</td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" name="diarrhea"> Diarrhea</td>
+            <td><input type="checkbox" name="rash"> Skin Rash</td>
+            <td><input type="checkbox" name="dizziness"> Dizziness</td>
+          </tr>
+        </table>
+        <hr>
+        <input type="submit" value="Submit and See Diagnosis"> &nbsp;
+        <input type="reset" value="Clear Form">
+      </form>
+    </div>
+  </div>
+  </div><!-- end page-body -->
+  <footer><p>MEDI-CONNECT &copy; 2025 | <a href="#contact">Contact Us</a></p></footer>
+</div>
+
+<div id="result" class="section">
+  <div class="page-body">
+  <div class="hdr">
+    <h1>MEDI-CONNECT</h1>
+    <p>Your Online Health Assistant | B.Tech CSE First Year Project</p>
+  </div>
+  <div class="main">
+
+    <div id="dynamic-result"></div>
+
+    <!-- static reference table always shown -->
+    <div class="box" id="ref-table-box">
+      <h2>Symptoms vs Disease Reference Table</h2>
+      <table>
+        <tr><th>Symptoms You May Have</th><th>Possible Disease</th><th>Severity</th></tr>
+        <tr id="ref-viral"><td>Fever, Body Ache, Fatigue, Headache</td><td class="blue">Viral Fever / Influenza</td><td style="color:orange">Moderate</td></tr>
+        <tr id="ref-cold"><td>Cough, Cold, Sore Throat</td><td class="blue">Common Cold / URI</td><td class="green">Mild</td></tr>
+        <tr id="ref-food"><td>Stomach Pain, Vomiting, Diarrhea</td><td class="blue">Food Poisoning / Gastroenteritis</td><td style="color:orange">Moderate</td></tr>
+        <tr id="ref-migraine"><td>Headache, Dizziness</td><td class="blue">Migraine / Low BP</td><td class="green">Mild</td></tr>
+        <tr id="ref-allergy"><td>Skin Rash, Itching (Rash)</td><td class="blue">Allergy / Skin Rash</td><td style="color:orange">Mild-Moderate</td></tr>
+        <tr id="ref-flu"><td>Fever, Cough, Fatigue, Body Ache</td><td class="blue">Flu / COVID-like Illness</td><td style="color:red">High</td></tr>
+      </table>
+    </div>
+
+    <!-- 6 static result boxes — hidden by default, JS shows only the matched one -->
+    <div class="box static-result-box" id="box-viral">
+      <h2>Result – Viral Fever / Influenza</h2>
+      <p><b>Symptoms:</b> Fever, Body Ache, Fatigue, Headache &nbsp;&nbsp; <b>Severity:</b> <span id="sev-viral" style="color:orange">Moderate</span></p>
+      <table>
+        <tr><th>Medicine</th><th>Dosage</th><th>When to Take</th></tr>
+        <tr><td>Paracetamol 500mg</td><td>1 tablet</td><td>2 times a day after meals</td></tr>
+        <tr><td>Cetirizine 10mg</td><td>1 tablet</td><td>At night before sleeping</td></tr>
+        <tr><td>ORS Sachet</td><td>1 sachet in 1L water</td><td>Every 2-3 hours</td></tr>
+        <tr><td>Vitamin C Tablet</td><td>1 tablet</td><td>Once daily after breakfast</td></tr>
+      </table>
+      <p id="advice-viral"><b>Advice:</b> Bed rest. Drink 3L water daily. Avoid cold food. Visit hospital if fever crosses 103°F.</p>
+      <p id="days-note-viral" class="warn"></p>
+    </div>
+
+    <div class="box static-result-box" id="box-cold">
+      <h2>Result – Common Cold / URI</h2>
+      <p><b>Symptoms:</b> Cough, Cold, Sore Throat &nbsp;&nbsp; <b>Severity:</b> <span id="sev-cold" class="green">Mild</span></p>
+      <table>
+        <tr><th>Medicine</th><th>Dosage</th><th>When to Take</th></tr>
+        <tr><td>Cetirizine 10mg</td><td>1 tablet</td><td>At night</td></tr>
+        <tr><td>Benadryl Cough Syrup</td><td>2 teaspoon</td><td>3 times a day</td></tr>
+        <tr><td>Strepsils Lozenges</td><td>1 lozenge</td><td>3-4 times a day</td></tr>
+      </table>
+      <p id="advice-cold"><b>Advice:</b> Steam inhalation 2x daily. Warm water with ginger and honey. Avoid cold drinks.</p>
+      <p id="days-note-cold" class="warn"></p>
+    </div>
+
+    <div class="box static-result-box" id="box-food">
+      <h2>Result – Food Poisoning / Gastroenteritis</h2>
+      <p><b>Symptoms:</b> Stomach Pain, Vomiting, Diarrhea &nbsp;&nbsp; <b>Severity:</b> <span id="sev-food" style="color:orange">Moderate</span></p>
+      <table>
+        <tr><th>Medicine</th><th>Dosage</th><th>When to Take</th></tr>
+        <tr><td>ORS Sachet</td><td>1 sachet</td><td>After every loose motion</td></tr>
+        <tr><td>Domperidone 10mg</td><td>1 tablet</td><td>Before every meal</td></tr>
+        <tr><td>Metronidazole 400mg</td><td>1 tablet</td><td>2 times a day for 5 days</td></tr>
+      </table>
+      <p id="advice-food"><b>Advice:</b> Eat light food like khichdi and banana. Drink boiled water only. Avoid oily/spicy food.</p>
+      <p id="days-note-food" class="warn"></p>
+    </div>
+
+    <div class="box static-result-box" id="box-migraine">
+      <h2>Result – Migraine / Low BP</h2>
+      <p><b>Symptoms:</b> Headache, Dizziness &nbsp;&nbsp; <b>Severity:</b> <span id="sev-migraine" class="green">Mild</span></p>
+      <table>
+        <tr><th>Medicine</th><th>Dosage</th><th>When to Take</th></tr>
+        <tr><td>Saridon / Combiflam</td><td>1 tablet</td><td>When headache starts, after food</td></tr>
+        <tr><td>Electral Powder</td><td>1 sachet in water</td><td>Once or twice daily</td></tr>
+      </table>
+      <p id="advice-migraine"><b>Advice:</b> Rest in a dark quiet room. Drink plenty of fluids. Avoid screen time during headache.</p>
+      <p id="days-note-migraine" class="warn"></p>
+    </div>
+
+    <div class="box static-result-box" id="box-allergy">
+      <h2>Result – Allergy / Skin Rash</h2>
+      <p><b>Symptoms:</b> Skin Rash, Itching &nbsp;&nbsp; <b>Severity:</b> <span id="sev-allergy" style="color:orange">Mild-Moderate</span></p>
+      <table>
+        <tr><th>Medicine</th><th>Dosage</th><th>When to Take</th></tr>
+        <tr><td>Cetirizine 10mg</td><td>1 tablet</td><td>Once daily at night</td></tr>
+        <tr><td>Calamine Lotion</td><td>Apply gently</td><td>2-3 times on affected area</td></tr>
+        <tr><td>Betamethasone Cream</td><td>Thin layer</td><td>Twice daily on rash</td></tr>
+      </table>
+      <p id="advice-allergy"><b>Advice:</b> Avoid scratching. Wear loose cotton clothes. Identify and avoid allergy trigger.</p>
+      <p id="days-note-allergy" class="warn"></p>
+    </div>
+
+    <div class="box static-result-box" id="box-flu">
+      <h2>Result – Flu / COVID-like Illness</h2>
+      <p><b>Symptoms:</b> Fever, Cough, Fatigue, Body Ache &nbsp;&nbsp; <b>Severity:</b> <span id="sev-flu" style="color:red">High</span></p>
+      <table>
+        <tr><th>Medicine</th><th>Dosage</th><th>When to Take</th></tr>
+        <tr><td>Paracetamol 650mg</td><td>1 tablet</td><td>3 times a day after meals</td></tr>
+        <tr><td>Azithromycin 500mg</td><td>1 tablet</td><td>Once daily for 5 days</td></tr>
+        <tr><td>Vitamin C + Zinc</td><td>1 tablet</td><td>Once daily after breakfast</td></tr>
+        <tr><td>ORS Sachet</td><td>1 sachet in 1L water</td><td>Every 3-4 hours</td></tr>
+      </table>
+      <p id="advice-flu"><b>Advice:</b> Isolate yourself. Wear mask. Get COVID test if fever persists. Seek hospital if breathing is difficult.</p>
+      <p id="days-note-flu" class="warn"></p>
+    </div>
+
+    <div class="box">
+      <a href="#diagnosis"><input type="button" value="Try Again"></a> &nbsp;&nbsp;
+      <a href="#home"><input type="button" value="Go to Home"></a>
+    </div>
+
+  </div>
+  </div><!-- end page-body -->
+  <footer><p>MEDI-CONNECT &copy; 2025 | Group 7 | <a href="#contact">Contact Us</a></p></footer>
+</div>
+
+<!-- ==================== PART 3 - AJEYA MEHTA (About + Contact Pages) ==================== -->
+
+<div id="about" class="section">
+  <div class="page-body">
+  <div class="hdr">
+    <h1>MEDI-CONNECT</h1>
+    <p>Your Online Health Assistant | B.Tech CSE First Year Project</p>
+  </div>
+  <div class="main">
+    <div class="box">
+      <h2>About This Project</h2>
+      <p>MEDI-CONNECT is a mini project by First Year B.Tech CSE students. A person can enter their symptoms and get a basic idea of what disease they might have. Built using only HTML and CSS as part of Web Technology subject.</p>
+    </div>
+    <div class="box">
+      <h2>Our Team - Group 7</h2>
+      <table>
+        <tr><th>Sr.</th><th>Name</th><th>Roll No.</th><th>Work Done</th></tr>
+        <tr><td>1</td><td>Parth Saini</td><td>2510992682</td><td>HTML Pages, Navbar, Footer</td></tr>
+        <tr><td>2</td><td>Ajeya Mehta</td><td>2510993618</td><td>CSS Styling, Color Theme</td></tr>
+        <tr><td>3</td><td>Saksham Sharma</td><td>2510993608</td><td>Diagnosis Page, Form Design</td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h2>Technologies Used</h2>
+      <table>
+        <tr><th>Technology</th><th>Use</th><th>Version</th></tr>
+        <tr><td>HTML</td><td>Structure of all web pages</td><td>HTML5</td></tr>
+        <tr><td>CSS</td><td>Styling and layout</td><td>CSS3</td></tr>
+        <tr><td>Notepad++</td><td>Code editor used</td><td>8.x</td></tr>
+        <tr><td>Google Chrome</td><td>Browser for testing</td><td>Latest</td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h2>Project Guide</h2>
+      <p><b>Subject:</b> Web Technology (WT) Lab &nbsp;&nbsp; <b>Guide:</b> Prof. A.K. Mishra</p>
+      <p><b>Department:</b> CSE &nbsp;&nbsp; <b>Year:</b> 2024-2025 &nbsp;&nbsp; <b>Semester:</b> 2nd</p>
+    </div>
+  </div>
+  </div><!-- end page-body -->
+  <footer><p>MEDI-CONNECT &copy; 2025 | Group 7 | <a href="#contact">Contact Us</a></p></footer>
+</div>
+
+<div id="contact" class="section">
+  <div class="page-body">
+  <div class="hdr">
+    <h1>MEDI-CONNECT</h1>
+    <p>Your Online Health Assistant | B.Tech CSE First Year Project</p>
+  </div>
+  <div class="main">
+    <div class="box">
+      <h2>Contact Us</h2>
+      <p><b>Email:</b> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="472a22232e242829292224336920352832377007202a262e2b6924282a">[email&#160;protected]</a></p>
+      <p><b>Phone:</b> +91-98765-43210</p>
+      <p><b>College:</b> XYZ Institute of Technology, Block B, Room 204</p>
+      <p><b>Department:</b> Computer Science and Engineering</p>
+    </div>
+    <div class="box">
+      <h2>Send Us a Message</h2>
+      <form action="#" method="get">
+        <table>
+          <tr>
+            <td><label>Your Name:</label><br><input type="text" name="cname" placeholder="Enter your name"></td>
+            <td><label>Your Email:</label><br><input type="text" name="cemail" placeholder="Enter your email"></td>
+          </tr>
+        </table>
+        <br>
+        <label>Subject:</label><br>
+        <input type="text" name="subject" placeholder="Enter subject" style="width:430px"><br><br>
+        <label>Message:</label><br>
+        <textarea name="message" rows="5" cols="60" placeholder="Type your message..." style="font-size:14px; border:1px solid #aaa; padding:7px"></textarea>
+        <br><br>
+        <input type="submit" value="Send Message"> &nbsp;
+        <input type="reset" value="Clear">
+      </form>
+    </div>
+    <div class="box">
+      <h2>Feedback</h2>
+      <p>This is our first web project. Please give honest feedback so we can improve next time. Thank you for visiting MEDI-CONNECT!</p>
+      <p style="color:gray">-- Group 7, First Year B.Tech CSE</p>
+    </div>  </div><!-- end .main -->
+  </div><!-- end page-body -->
+  <footer><p>MEDI-CONNECT &copy; 2025 | Group 7 | <a href="#contact">Contact Us</a></p></footer>
+</div><!-- end #contact -->
+
+<!-- Toast element -->
+<div id="toast"></div>
+
+<script>
+/* ===== LIVE CLOCK ===== */
+(function () {
+  const nav = document.querySelector('.nav');
+  const clock = document.createElement('span');
+  clock.id = 'liveclock';
+  nav.appendChild(clock);
+  function tick() {
+    clock.textContent = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* ===== TOAST ===== */
+function showToast(msg, duration) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration || 3000);
+}
+
+/* ===== DISEASE DATA ===== */
+// Each disease has: key, symptom triggers, base severity, and day-based escalation rules
+const diseases = [
+  {
+    key: 'viral',
+    symptoms: ['fever', 'bodyache', 'fatigue', 'headache'],
+    // days thresholds: { upTo: N, severity, sevColor, extraAdvice, urgency }
+    dayRules: [
+      { upTo: 2,  severity: 'Mild',     sevColor: 'green',  note: 'Early stage (1–2 days). Rest at home, stay hydrated. Monitor temperature regularly.' },
+      { upTo: 5,  severity: 'Moderate', sevColor: 'orange', note: 'Ongoing for ' },
+      { upTo: 999,severity: 'Severe',   sevColor: 'red',    note: '⚠️ Sick for over 5 days — fever this long needs a doctor visit. Do not delay.' }
+    ]
+  },
+  {
+    key: 'cold',
+    symptoms: ['cough', 'cold', 'throat'],
+    dayRules: [
+      { upTo: 3,  severity: 'Mild',     sevColor: 'green',  note: 'Early stage (1–3 days). Steam inhalation and warm fluids should help quickly.' },
+      { upTo: 7,  severity: 'Moderate', sevColor: 'orange', note: 'Cold lasting ' },
+      { upTo: 999,severity: 'Severe',   sevColor: 'red',    note: '⚠️ Cold/cough beyond 7 days may indicate infection. See a doctor.' }
+    ]
+  },
+  {
+    key: 'food',
+    symptoms: ['stomach', 'vomiting', 'diarrhea'],
+    dayRules: [
+      { upTo: 1,  severity: 'Mild',     sevColor: 'green',  note: 'Likely mild food poisoning. ORS and bland food. Should pass within 24 hrs.' },
+      { upTo: 3,  severity: 'Moderate', sevColor: 'orange', note: 'Ongoing for ' },
+      { upTo: 999,severity: 'Severe',   sevColor: 'red',    note: '⚠️ Vomiting/diarrhea for more than 3 days is dangerous. Go to hospital for IV fluids.' }
+    ]
+  },
+  {
+    key: 'migraine',
+    symptoms: ['headache', 'dizziness'],
+    dayRules: [
+      { upTo: 1,  severity: 'Mild',     sevColor: 'green',  note: 'One-day headache. Rest in a dark room, drink water, avoid screens.' },
+      { upTo: 3,  severity: 'Moderate', sevColor: 'orange', note: 'Headache/dizziness for ' },
+      { upTo: 999,severity: 'Severe',   sevColor: 'red',    note: '⚠️ Persistent headache over 3 days needs neurological evaluation. Visit a doctor.' }
+    ]
+  },
+  {
+    key: 'allergy',
+    symptoms: ['rash'],
+    dayRules: [
+      { upTo: 2,  severity: 'Mild',     sevColor: 'green',  note: 'Fresh rash (1–2 days). Avoid trigger, apply calamine. Should reduce soon.' },
+      { upTo: 5,  severity: 'Moderate', sevColor: 'orange', note: 'Rash persisting for ' },
+      { upTo: 999,severity: 'Severe',   sevColor: 'red',    note: '⚠️ Rash lasting over 5 days needs dermatologist attention. Could be a deeper allergy.' }
+    ]
+  },
+  {
+    key: 'flu',
+    symptoms: ['fever', 'cough', 'fatigue', 'bodyache'],
+    dayRules: [
+      { upTo: 2,  severity: 'Moderate', sevColor: 'orange', note: 'Early flu stage (1–2 days). Rest and antipyretics. Monitor for breathing issues.' },
+      { upTo: 5,  severity: 'High',     sevColor: 'red',    note: '⚠️ Flu for ' },
+      { upTo: 999,severity: 'Critical', sevColor: 'darkred',note: '🚨 Flu for over 5 days is serious. Seek hospital immediately — risk of pneumonia.' }
+    ]
+  }
+];
+
+function getDayRule(rules, days) {
+  return rules.find(r => days <= r.upTo) || rules[rules.length - 1];
+}
+
+function scoreDisease(d, checked) {
+  if (!checked.length) return 0;
+  return d.symptoms.filter(s => checked.includes(s)).length / d.symptoms.length;
+}
+
+/* ===== SYMPTOM COUNTER ===== */
+document.addEventListener('DOMContentLoaded', function () {
+  const checkboxes = document.querySelectorAll('.sym input[type=checkbox]');
+  const symTable = checkboxes.length ? checkboxes[0].closest('table') : null;
+  let counter = null;
+  if (symTable) {
+    counter = document.createElement('p');
+    counter.id = 'sym-counter';
+    counter.style.cssText = 'color:#1a5276;font-weight:bold;margin-top:8px;font-size:14px;';
+    symTable.after(counter);
+  }
+  function updateCounter() {
+    const n = document.querySelectorAll('.sym input[type=checkbox]:checked').length;
+    if (counter) counter.textContent = n === 0 ? '' : `${n} symptom${n > 1 ? 's' : ''} selected`;
+  }
+  checkboxes.forEach(cb => cb.addEventListener('change', updateCounter));
+
+  /* ===== DIAGNOSIS FORM SUBMIT ===== */
+  const diagForm = document.querySelector('#diagnosis form');
+  if (diagForm) {
+    diagForm.addEventListener('submit', function (e) {
+      const name = diagForm.querySelector('input[name="name"]').value.trim();
+      const age  = diagForm.querySelector('input[name="age"]').value.trim();
+      const days = parseInt(diagForm.querySelector('input[name="days"]').value) || 0;
+
+      if (!name) { showToast('⚠️ Please enter patient name.'); e.preventDefault(); return; }
+      if (!age)  { showToast('⚠️ Please enter age.');         e.preventDefault(); return; }
+      if (!days) { showToast('⚠️ Please enter days sick.');   e.preventDefault(); return; }
+
+      const symNames = ['fever','headache','cough','cold','throat','bodyache','stomach','vomiting','fatigue','diarrhea','rash','dizziness'];
+      const checked = symNames.filter(n => {
+        const el = diagForm.querySelector(`input[name="${n}"]`);
+        return el && el.checked;
+      });
+
+      // Score every disease and pick best match
+      let best = null, bestScore = 0;
+      diseases.forEach(d => {
+        const s = scoreDisease(d, checked);
+        if (s > bestScore) { bestScore = s; best = d; }
+      });
+
+      sessionStorage.setItem('diagResult', JSON.stringify({
+        name, age, days,
+        matched: best && bestScore > 0 ? best.key : null,
+        symptoms: checked
+      }));
+    });
+  }
+
+  /* ===== RENDER RESULT PAGE ===== */
+  function renderResult() {
+    const raw = sessionStorage.getItem('diagResult');
+    if (!raw) return;
+    const r = JSON.parse(raw);
+
+    // Hide all static boxes first
+    document.querySelectorAll('.static-result-box').forEach(b => b.classList.remove('active'));
+    // Reset all ref table highlights
+    document.querySelectorAll('#ref-table-box tr').forEach(tr => tr.classList.remove('match-highlight'));
+
+    const dynBox = document.getElementById('dynamic-result');
+
+    if (!r.matched || !r.symptoms.length) {
+      dynBox.innerHTML = `<div class="box" style="border-color:#2980b9">
+        <h2 style="color:#1a5276">No Symptoms Matched</h2>
+        <p>Hi <b>${r.name}</b>, no symptoms were selected or none matched a known condition.
+        Please go back and tick your symptoms.</p>
+      </div>`;
+      dynBox.classList.add('show');
+      return;
+    }
+
+    // Show the matched static box
+    const matchedBox = document.getElementById('box-' + r.matched);
+    if (matchedBox) matchedBox.classList.add('active');
+
+    // Highlight reference table row
+    const refRow = document.getElementById('ref-' + r.matched);
+    if (refRow) refRow.classList.add('match-highlight');
+
+    // Apply day-based severity and note
+    const disease = diseases.find(d => d.key === r.matched);
+    const rule = getDayRule(disease.dayRules, r.days);
+
+    const sevEl = document.getElementById('sev-' + r.matched);
+    if (sevEl) {
+      sevEl.textContent = rule.severity;
+      sevEl.style.color = rule.sevColor;
+      sevEl.className = ''; // remove .green class if present
+    }
+
+    const noteEl = document.getElementById('days-note-' + r.matched);
+    if (noteEl) {
+      // If note is a template (contains trailing space), fill in days
+      const noteText = rule.note.endsWith(' ')
+        ? rule.note + r.days + ` day${r.days > 1 ? 's' : ''} — consider seeing a doctor if not improving.`
+        : rule.note;
+      noteEl.textContent = '⏱ Duration note: ' + noteText;
+      noteEl.style.color = rule.sevColor;
+      noteEl.style.fontWeight = 'bold';
+      noteEl.style.fontStyle = 'normal';
+    }
+
+    // Show patient summary banner
+    const symDisplay = r.symptoms.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ');
+    dynBox.innerHTML = `<div class="box" style="background:#e8f5e9;border-color:${rule.sevColor};border-width:2px">
+      <h2 style="color:darkgreen;border-color:green">✅ Diagnosis for ${r.name} | Age: ${r.age} | Sick for ${r.days} day${r.days>1?'s':''}</h2>
+      <p><b>Symptoms entered:</b> ${symDisplay}</p>
+      <p><b>Matched condition:</b> <span style="color:#1a5276;font-weight:bold">${matchedBox ? matchedBox.querySelector('h2').textContent.replace('Result – ','') : ''}</span></p>
+      <p><b>Severity based on duration:</b> <span style="color:${rule.sevColor};font-weight:bold">${rule.severity}</span></p>
+      <p class="red">** This is an automated suggestion only. Always consult a qualified doctor. **</p>
+    </div>`;
+    dynBox.classList.add('show');
+  }
+
+  function onHash() { if (window.location.hash === '#result') setTimeout(renderResult, 80); }
+  window.addEventListener('hashchange', onHash);
+  onHash();
+
+  /* ===== CONTACT FORM TOAST ===== */
+  const contactForm = document.querySelector('#contact form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const cname = contactForm.querySelector('input[name="cname"]').value.trim();
+      if (!cname) { showToast('⚠️ Please enter your name.'); return; }
+      showToast(`✅ Thank you, ${cname}! Your message has been sent.`, 4000);
+      contactForm.reset();
+    });
+  }
+});
+</script>
+</body>
+</html>
